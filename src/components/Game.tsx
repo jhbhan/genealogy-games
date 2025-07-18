@@ -9,6 +9,7 @@ export function GenealogyGame() {
   const [input, setInput] = useState("");
   const [completed, setCompleted] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [lives, setLives] = useState(3);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
   const [gameOver, setGameOver] = useState(false);
@@ -49,19 +50,12 @@ export function GenealogyGame() {
       setHardTimer((prev) => {
         if (prev <= 1) {
           clearInterval(countdown);
-          setError(`⏱ Time's up! You didn't type "${genealogy[currentIndex]}" in time.`);
-          setGameOver(true);
-
-          // Save longest streak if better
-          if (completed.length > longestStreak) {
-            setLongestStreak(completed.length);
-            localStorage.setItem("genealogy_longest_streak", completed.length.toString());
-          }
+          handleGameOver(`⏱ Time's up! The answer was "${genealogy[currentIndex]}".`);
         }
         return prev - 1;
       });
-      return () => clearInterval(countdown);
     }, 1000);
+
 
     return () => clearInterval(countdown);
   }, [currentIndex, mode, gameOver]);
@@ -77,6 +71,7 @@ export function GenealogyGame() {
       setCompleted([...completed, expected]);
       setCurrentIndex(currentIndex + 1);
       setInput("");
+      setError("");
 
       // If completed everything
       if (currentIndex + 1 === genealogy.length) {
@@ -90,22 +85,32 @@ export function GenealogyGame() {
           localStorage.setItem("genealogy_fastest_time", finishTime.toString());
         }
 
-        // Save longest streak (full completion is perfect streak)
+        // Save longest streak (full completion)
         if (genealogy.length > longestStreak) {
           setLongestStreak(genealogy.length);
           localStorage.setItem("genealogy_longest_streak", genealogy.length.toString());
         }
       }
     } else {
-      // Game Over
-      setError(`❌ Wrong! Expected was "${expected}"`);
-      setGameOver(true);
-
-      // Save longest streak if better
-      if (completed.length > longestStreak) {
-        setLongestStreak(completed.length);
-        localStorage.setItem("genealogy_longest_streak", completed.length.toString());
+      // Wrong answer: lose a life
+      if ((lives - 1) > 0) {
+        setInput("");
+        setLives(lives - 1);
+        setError(`❌ Wrong! The correct was "${expected}". Lives left: ${lives - 1}`);
+      } else {
+        handleGameOver(`❌ Wrong! No lives left. The correct was "${expected}".`);
       }
+    }
+  };
+
+  const handleGameOver = (msg: string) => {
+    setError(msg);
+    setGameOver(true);
+
+    // Save longest streak if better
+    if (completed.length > longestStreak) {
+      setLongestStreak(completed.length);
+      localStorage.setItem("genealogy_longest_streak", completed.length.toString());
     }
   };
 
@@ -118,6 +123,7 @@ export function GenealogyGame() {
     setTimeElapsed(0);
     setGameOver(false);
     setHardTimer(2);
+    setLives(config?.lives || 3);
   };
 
   const formatTime = (ms: number) => {
@@ -140,8 +146,16 @@ export function GenealogyGame() {
 
   // ✅ Show a hint in Easy Mode
   const getHint = () => {
+    const hintType = config?.hint;
     const expected = genealogy[currentIndex];
-    return expected.slice(0, 2) + "…";
+    if (hintType === "full") {
+      return expected; // Full hint shows the full name
+    }
+    else if (hintType === "letters") {
+      // Show first 2 letters + last letter
+      return expected.slice(0, 2) + "…";
+    }
+    return;
   };
 
   if (!mode) {
@@ -175,8 +189,9 @@ export function GenealogyGame() {
 
       {/* High Score Display */}
       <div style={{ ...styles.highScoreBox, ...theme.card }}>
-        <p>🏆 Longest Streak: <strong>{longestStreak}</strong> names</p>
-        {fastestTime && <p>⏱ Fastest Completion: <strong>{formatTime(fastestTime)}</strong></p>}
+        <p>🏆 Longest Streak: <strong>{longestStreak}</strong></p>
+        {fastestTime && <p>⏱ Fastest: <strong>{formatTime(fastestTime)}</strong></p>}
+        <p>❤️ Lives: <strong>{lives}</strong></p>
       </div>
 
       {/* Completed Names */}
@@ -194,7 +209,12 @@ export function GenealogyGame() {
       {mode === "extreme" && !gameOver && <p style={{ color: "red" }}>⏳ {hardTimer}s left!</p>}
 
       {/* Hint for Easy Mode */}
-      {mode === "easy" && !gameOver && <p style={{ color: "green" }}>💡 Hint: {getHint()}</p>}
+      {(mode === "easy" || mode === "baby") 
+        && !gameOver && 
+          <p style={{ color: "green" }}>
+            💡 Hint: {getHint()}
+          </p>
+          }
 
       {/* Input + Submit */}
       {!gameOver ? (
@@ -226,8 +246,9 @@ export function GenealogyGame() {
       )}
 
       {/* Progress Info */}
-      <p style={{ marginTop: 20, fontSize: 16, ...theme.text }}>
-        Progress: <strong>{completed.length}</strong> / {genealogy.length}
+      {error && !gameOver &&<p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
+      <p style={{ marginTop: "20px", fontSize: "14px" }}>
+        Progress: {completed.length}/{genealogy.length}
       </p>
       {startTime && !gameOver && (
         <p style={{ fontSize: 14, ...theme.subText }}>
