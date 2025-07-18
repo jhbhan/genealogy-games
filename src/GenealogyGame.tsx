@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { difficultyConfig, genealogy, type Mode } from "../constants";
-import { darkStyles, lightStyles, styles, themeToggleButton } from "../styles";
-import { ModeSelector } from "./ModeSelector";
+import React, { useEffect, useState } from "react";
+import { ModeSelector } from "./components/ModeSelector";
+import { difficultyConfig, genealogy, type Mode } from "./constants";
+import { darkStyles, lightStyles, styles, themeToggleButton } from "./styles";
 
-export function GenealogyGame() {
+export default function GenealogyGame() {
   const [mode, setMode] = useState<Mode | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [input, setInput] = useState("");
