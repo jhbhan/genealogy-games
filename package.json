@@ -1,6 +1,6 @@
 {
   "name": "@jhbhan/genealogy-games",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A fun Matthew 1 genealogy game for React",
   "type": "module",
   "main": "dist/index.cjs",
