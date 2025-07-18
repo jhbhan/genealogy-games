@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { genealogy, type Mode } from "../constants";
+import { difficultyConfig, genealogy, type Mode } from "../constants";
 import { darkStyles, lightStyles, styles, themeToggleButton } from "../styles";
 import { ModeSelector } from "./ModeSelector";
 
@@ -16,6 +16,8 @@ export function GenealogyGame() {
   const [longestStreak, setLongestStreak] = useState<number>(0);
   const [darkMode, setDarkMode] = useState(false);
   const [hardTimer, setHardTimer] = useState(2); // Hard mode countdown
+
+  const config = mode ? difficultyConfig[mode] : null;
 
   // Load highscores + dark mode preference
   useEffect(() => {
@@ -38,9 +40,9 @@ export function GenealogyGame() {
     return () => clearInterval(timer);
   }, [startTime, gameOver, currentIndex]);
 
-  // Hard mode per-name countdown
+  // Extreme mode per-name countdown
   useEffect(() => {
-    if (mode !== "hard" || gameOver || currentIndex >= genealogy.length) return;
+    if (mode !== "extreme" || gameOver || currentIndex >= genealogy.length) return;
 
     setHardTimer(2); // reset countdown each new name
     const countdown = setInterval(() => {
@@ -188,8 +190,8 @@ export function GenealogyGame() {
         </div>
       )}
 
-      {/* Timer hint for Hard Mode */}
-      {mode === "hard" && !gameOver && <p style={{ color: "red" }}>⏳ {hardTimer}s left!</p>}
+      {/* Timer hint for Extreme Mode */}
+      {mode === "extreme" && !gameOver && <p style={{ color: "red" }}>⏳ {hardTimer}s left!</p>}
 
       {/* Hint for Easy Mode */}
       {mode === "easy" && !gameOver && <p style={{ color: "green" }}>💡 Hint: {getHint()}</p>}

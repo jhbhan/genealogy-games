@@ -16,14 +16,21 @@ export const ModeSelector = (props: ModeSelectorProps) => {
         <p style={{ ...styles.subtitle, ...theme.subText }}>
           Choose your game mode:
         </p>
+        
+        <button onClick={() => setMode("baby")} style={modeButton("#77DD77")}>
+          🍼 Baby (Full hints, 3 lives)
+        </button>
         <button onClick={() => setMode("easy")} style={modeButton("#4CAF50")}>
-          🟢 Easy (with hints)
+          🟢 Easy (2-letter hints, 3 lives)
         </button>
-        <button onClick={() => setMode("normal")} style={modeButton("#007BFF")}>
-          🔵 Normal
+        <button onClick={() => setMode("medium")} style={modeButton("#007BFF")}>
+          🔵 Medium (No hints, 3 lives)
         </button>
-        <button onClick={() => setMode("hard")} style={modeButton("#FF4444")}>
-          🔴 Hard (2 sec per name)
+        <button onClick={() => setMode("hard")} style={modeButton("#FFAA00")}>
+          🟠 Hard (1 life, no hints)
+        </button>
+        <button onClick={() => setMode("extreme")} style={modeButton("#FF4444")}>
+          🔴 Extreme (2 sec per name, 1 life)
         </button>
 
         {/* Dark Mode Toggle */}
